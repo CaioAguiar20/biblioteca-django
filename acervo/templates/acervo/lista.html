@@ -5,14 +5,65 @@
 {% block conteudo %}
     <h2>Acervo da Biblioteca</h2>
 
+    <h3>Pesquisar livros</h3>
+
+    <form method="get">
+        <p>
+            <label for="nome">Nome:</label>
+            <input
+                type="text"
+                id="nome"
+                name="nome"
+                value="{{ nome }}"
+                placeholder="Digite o título"
+            >
+        </p>
+
+        <p>
+            <label for="tipo">Tipo:</label>
+            <select id="tipo" name="tipo">
+                <option value="">Todos</option>
+
+                {% for valor, texto in tipos %}
+                    <option value="{{ valor }}" {% if tipo == valor %}selected{% endif %}>
+                        {{ texto }}
+                    </option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <p>
+            <label for="categoria">Categoria:</label>
+            <select id="categoria" name="categoria">
+                <option value="">Todas</option>
+
+                {% for valor, texto in categorias %}
+                    <option value="{{ valor }}" {% if categoria == valor %}selected{% endif %}>
+                        {{ texto }}
+                    </option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <button type="submit">Pesquisar</button>
+        <a href="{% url 'lista_livros' %}">Limpar pesquisa</a>
+    </form>
+
+    <hr>
+
     <ul>
         {% for livro in livros %}
             <li>
                 <strong>{{ livro.titulo }}</strong>
                 — {{ livro.autor }} ({{ livro.ano }})
+
+                <br>
+                Tipo: {{ livro.get_tipo_display }}
+                <br>
+                Categoria: {{ livro.get_categoria_display }}
             </li>
         {% empty %}
-            <li>Nenhum livro cadastrado.</li>
+            <li>Nenhum livro encontrado.</li>
         {% endfor %}
     </ul>
 {% endblock %}
