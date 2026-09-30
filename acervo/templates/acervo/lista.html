@@ -60,6 +60,7 @@
                     <th>Ano</th>
                     <th>Tipo</th>
                     <th>Categoria</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
 
@@ -71,6 +72,9 @@
                         <td>{{ livro.ano }}</td>
                         <td>{{ livro.get_tipo_display }}</td>
                         <td>{{ livro.get_categoria_display }}</td>
+                        <td>
+                            <a href="{% url 'editar_livro' livro.id %}">Editar</a>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
