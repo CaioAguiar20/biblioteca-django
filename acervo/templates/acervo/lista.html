@@ -52,6 +52,8 @@
     <hr>
 
     {% if livros %}
+        <p>{{ livros|length }} livro(s) encontrado(s).</p>
+
         <table border="1" cellpadding="8">
             <thead>
                 <tr>
@@ -73,7 +75,13 @@
                         <td>{{ livro.get_tipo_display }}</td>
                         <td>{{ livro.get_categoria_display }}</td>
                         <td>
-                            <a href="{% url 'editar_livro' livro.id %}">Editar</a>
+                            <a href="{% url 'editar_livro' livro.id %}">
+                                Editar
+                            </a>
+                            |
+                            <a href="{% url 'excluir_livro' livro.id %}">
+                                Excluir
+                            </a>
                         </td>
                     </tr>
                 {% endfor %}

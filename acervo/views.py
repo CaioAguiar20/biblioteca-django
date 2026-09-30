@@ -71,3 +71,17 @@ def editar_livro(request, livro_id):
         "acervo/form.html",
         {"form": form},
     )
+
+
+def excluir_livro(request, livro_id):
+    livro = get_object_or_404(Livro, id=livro_id)
+
+    if request.method == "POST":
+        livro.delete()
+        return redirect("lista_livros")
+
+    return render(
+        request,
+        "acervo/confirmar_exclusao.html",
+        {"livro": livro},
+    )
