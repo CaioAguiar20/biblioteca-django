@@ -1,5 +1,5 @@
 from django.db.models import Q
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from .forms import LivroForm
 from .models import Livro
 
@@ -46,6 +46,25 @@ def novo_livro(request):
             return redirect("lista_livros")
     else:
         form = LivroForm()
+
+    return render(
+        request,
+        "acervo/form.html",
+        {"form": form},
+    )
+
+
+def editar_livro(request, livro_id):
+    livro = get_object_or_404(Livro, id=livro_id)
+
+    if request.method == "POST":
+        form = LivroForm(request.POST, instance=livro)
+
+        if form.is_valid():
+            form.save()
+            return redirect("lista_livros")
+    else:
+        form = LivroForm(instance=livro)
 
     return render(
         request,
