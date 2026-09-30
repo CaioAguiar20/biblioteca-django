@@ -51,19 +51,31 @@
 
     <hr>
 
-    <ul>
-        {% for livro in livros %}
-            <li>
-                <strong>{{ livro.titulo }}</strong>
-                — {{ livro.autor }} ({{ livro.ano }})
+    {% if livros %}
+        <table border="1" cellpadding="8">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Autor</th>
+                    <th>Ano</th>
+                    <th>Tipo</th>
+                    <th>Categoria</th>
+                </tr>
+            </thead>
 
-                <br>
-                Tipo: {{ livro.get_tipo_display }}
-                <br>
-                Categoria: {{ livro.get_categoria_display }}
-            </li>
-        {% empty %}
-            <li>Nenhum livro encontrado.</li>
-        {% endfor %}
-    </ul>
+            <tbody>
+                {% for livro in livros %}
+                    <tr>
+                        <td>{{ livro.titulo }}</td>
+                        <td>{{ livro.autor }}</td>
+                        <td>{{ livro.ano }}</td>
+                        <td>{{ livro.get_tipo_display }}</td>
+                        <td>{{ livro.get_categoria_display }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nenhum livro encontrado.</p>
+    {% endif %}
 {% endblock %}
