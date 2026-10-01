@@ -5,11 +5,12 @@ from .models import Livro
 
 
 def lista_livros(request):
-    livros = Livro.objects.all().order_by("titulo")
+    livros = Livro.objects.all()
 
     nome = request.GET.get("nome", "").strip()
     tipo = request.GET.get("tipo", "").strip()
     categoria = request.GET.get("categoria", "").strip()
+    ordem = request.GET.get("ordem", "titulo")
 
     if nome:
         livros = livros.filter(
@@ -23,6 +24,15 @@ def lista_livros(request):
     if categoria:
         livros = livros.filter(categoria=categoria)
 
+    opcoes_ordenacao = {
+        "titulo": "titulo",
+        "titulo_desc": "-titulo",
+        "ano": "ano",
+        "ano_desc": "-ano",
+    }
+
+    livros = livros.order_by(opcoes_ordenacao.get(ordem, "titulo"))
+
     return render(
         request,
         "acervo/lista.html",
@@ -31,6 +41,7 @@ def lista_livros(request):
             "nome": nome,
             "tipo": tipo,
             "categoria": categoria,
+            "ordem": ordem,
             "tipos": Livro.TIPO_ACERVO,
             "categorias": Livro.CATEGORIAS,
         },
@@ -81,7 +92,6 @@ def excluir_livro(request, livro_id):
         return redirect("lista_livros")
 
     return render(
-        request,
         "acervo/confirmar_exclusao.html",
         {"livro": livro},
     )

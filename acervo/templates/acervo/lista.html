@@ -45,6 +45,27 @@
             </select>
         </p>
 
+        <p>
+            <label for="ordem">Ordenar por:</label>
+            <select id="ordem" name="ordem">
+                <option value="titulo" {% if ordem == "titulo" %}selected{% endif %}>
+                    Título: A–Z
+                </option>
+
+                <option value="titulo_desc" {% if ordem == "titulo_desc" %}selected{% endif %}>
+                    Título: Z–A
+                </option>
+
+                <option value="ano" {% if ordem == "ano" %}selected{% endif %}>
+                    Ano: mais antigo primeiro
+                </option>
+
+                <option value="ano_desc" {% if ordem == "ano_desc" %}selected{% endif %}>
+                    Ano: mais recente primeiro
+                </option>
+            </select>
+        </p>
+
         <button type="submit">Pesquisar</button>
         <a href="{% url 'lista_livros' %}">Limpar pesquisa</a>
     </form>
