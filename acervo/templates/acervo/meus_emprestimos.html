@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block titulo %}Meus Empréstimos{% endblock %}
+{% block conteudo %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+        <h3 class="fw-bold mb-1">Meus Livros Emprestados</h3>
+        <p class="text-muted small mb-0">Acompanhe os seus empréstimos ativos e histórico por unidade</p>
+    </div>
+</div>
+
+<!-- Filtro por Unidade -->
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold mb-1">Filtrar por Unidade</label>
+                <select name="biblioteca" id="seletorFiltroEmprestimos" class="form-select form-select-sm"
+                    onchange="this.form.submit()">
+                    <option value="">🌐 Todas as Unidades</option>
+                    <option value="saquarema">📍 Saquarema</option>
+                    <option value="marica">📍 Maricá</option>
+                </select>
+            </div>
+            {% if biblioteca_filtro %}
+            <div class="col-auto">
+                <a href="{% url 'meus_emprestimos' %}" class="btn btn-outline-secondary btn-sm">Limpar Filtro</a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<script>
+    // Mantém a opção de filtro selecionada automaticamente
+    const filtroAtual = "{{ biblioteca_filtro|default:'' }}";
+    if (filtroAtual) {
+        document.getElementById('seletorFiltroEmprestimos').value = filtroAtual;
+    }
+</script>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Livro</th>
+                    <th>Unidade</th>
+                    <th>Data Retirada</th>
+                    <th>Devolução Prevista</th>
+                    <th>Situação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in emprestimos %}
+                <tr>
+                    <td class="ps-4 fw-semibold">{{ emp.livro.titulo }}</td>
+                    <td>
+                        <span class="badge bg-light text-dark border">
+                            {{ emp.livro.get_biblioteca_display|default:emp.livro.biblioteca|title }}
+                        </span>
+                    </td>
+                    <td>{{ emp.data_emprestimo|date:"d/m/Y" }}</td>
+                    <td>{{ emp.data_prevista|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if emp.data_devolucao %}
+                        <span class="badge bg-secondary">Devolvido em {{ emp.data_devolucao|date:"d/m/Y" }}</span>
+                        {% elif emp.esta_atrasado %}
+                        <span class="badge bg-danger">ATRASADO!</span>
+                        {% else %}
+                        <span class="badge bg-success">Faltam {{ emp.dias_restantes }} dia(s)</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">Nenhum empréstimo encontrado para esta unidade.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

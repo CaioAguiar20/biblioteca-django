@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block titulo %}Painel Administrativo{% endblock %}
+{% block conteudo %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">Controle de Empréstimos (Admin)</h3>
+    <a href="{% url 'novo_livro' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Novo Livro</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-white py-3 fw-bold text-primary">Empréstimos Ativos no Momento</div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Livro</th>
+                    <th>Aluno (Matrícula)</th>
+                    <th>Tempo com o livro</th>
+                    <th>Prazo / Status</th>
+                    <th class="text-end pe-4">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in ativos %}
+                <tr class="{% if emp.esta_atrasado %}table-danger{% endif %}">
+                    <td class="ps-4 fw-semibold">{{ emp.livro.titulo }}</td>
+                    <td>{{ emp.usuario.first_name|default:emp.usuario.username }} ({{ emp.usuario.username }})</td>
+                    <td>{{ emp.dias_com_livro }} dia(s)</td>
+                    <td>
+                        {% if emp.esta_atrasado %}
+                        <span class="badge bg-danger">ATRASADO (Venceu {{ emp.data_prevista|date:"d/m" }})</span>
+                        {% else %}
+                        <span class="badge bg-success">Faltam {{ emp.dias_restantes }} dia(s)</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-4">
+                        <a href="{% url 'registrar_devolucao' emp.id %}" class="btn btn-sm btn-success">
+                            <i class="bi bi-check2-circle me-1"></i> Dar Baixa / Devolver
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">Nenhum livro emprestado no momento.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

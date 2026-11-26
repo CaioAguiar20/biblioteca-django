@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Dashboard - Biblioteca Acadêmica{% endblock %}
+
+{% block conteudo %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-primary text-white p-4 shadow-sm">
+            <h1 class="fw-bold mb-2">Bem-vindo(a), {{ user.first_name|default:user.username }}!</h1>
+            <p class="mb-0 text-white-50">
+                {% if user.is_staff %}
+                Painel gerencial e analítico da biblioteca (Unidade ativa: <strong>{{
+                    request.session.biblioteca_global|default:"Todas as Unidades"|title }}</strong>).
+                {% else %}
+                Consulte o acervo disponível em Saquarema e Maricá ou acompanhe os seus empréstimos ativos.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+{% if user.is_staff %}
+<!-- ================= VISÃO DO ADMINISTRADOR ================= -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <div>
+        <h3 class="fw-bold text-dark mb-0">Indicadores Gerenciais</h3>
+        <p class="text-muted small mb-0">Estatísticas de empréstimos, acervo e ranking de leitura por unidade</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'lista_livros' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-search me-1"></i> Gerenciar Acervo
+        </a>
+        <a href="{% url 'exportar_csv' %}?{{ request.GET.urlencode }}" class="btn btn-outline-success btn-sm">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Exportar CSV
+        </a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-auto">
+                <label class="form-label small fw-semibold mb-1">Início</label>
+                {{ form_periodo.inicio }}
+            </div>
+            <div class="col-auto">
+                <label class="form-label small fw-semibold mb-1">Fim</label>
+                {{ form_periodo.fim }}
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-dark btn-sm">Filtrar</button>
+                <a href="{% url 'home' %}" class="btn btn-link btn-sm text-decoration-none">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card h-100 border-start border-primary border-4">
+            <div class="card-body">
+                <small class="text-muted fw-semibold text-uppercase">Empréstimos no Período</small>
+                <h2 class="fw-bold mb-0 mt-1">{{ kpis.total_emprestimos }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card h-100 border-start border-warning border-4">
+            <div class="card-body">
+                <small class="text-muted fw-semibold text-uppercase">Em Aberto</small>
+                <h2 class="fw-bold mb-0 mt-1">{{ kpis.em_aberto }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card h-100 border-start border-success border-4">
+            <div class="card-body">
+                <small class="text-muted fw-semibold text-uppercase">Exemplares Disponíveis</small>
+                <h2 class="fw-bold text-success mb-0 mt-1">{{ kpis.total_disponiveis }} <span
+                        class="fs-6 text-muted fw-normal">/ {{ kpis.total_exemplares }}</span></h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card h-100 border-start border-danger border-4">
+            <div class="card-body">
+                <small class="text-muted fw-semibold text-uppercase">Em Atraso</small>
+                <h2 class="fw-bold text-danger mb-0 mt-1">{{ kpis.atrasados }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0"><i class="bi bi-trophy text-warning me-2"></i>Livros Mais Emprestados</h5>
+                <div class="btn-group btn-group-sm">
+                    <a href="?ranking=semanal"
+                        class="btn {% if periodo_ranking == 'semanal' %}btn-primary{% else %}btn-outline-primary{% endif %}">Semanal</a>
+                    <a href="?ranking=mensal"
+                        class="btn {% if periodo_ranking == 'mensal' %}btn-primary{% else %}btn-outline-primary{% endif %}">Mensal</a>
+                    <a href="?ranking=geral"
+                        class="btn {% if periodo_ranking == 'geral' %}btn-primary{% else %}btn-outline-primary{% endif %}">Geral</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover align-middle mb-0">
+                    <tbody>
+                        {% for item in ranking %}
+                        <tr>
+                            <td class="fw-semibold">{{ forloop.counter }}º {{ item.livro__titulo }}</td>
+                            <td class="text-muted small">{{ item.livro__autor }}</td>
+                            <td class="text-end"><span class="badge bg-primary rounded-pill">{{ item.total }}</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">Sem dados no período.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-pie-chart text-success me-2"></i>Distribuição do Acervo</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="grafDistribuicao" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white py-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-bar-chart-line text-primary me-2"></i>Empréstimos por Mês</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="grafMes" height="90"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- ================= VISÃO DO ALUNO ================= -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card p-4 text-center h-100 d-flex flex-column justify-content-center shadow-sm">
+            <i class="bi bi-collection display-4 text-primary mb-3"></i>
+            <h4 class="fw-bold">Consultar Acervo</h4>
+            <p class="text-muted">Procure livros físicos ou digitais disponíveis nas unidades de Saquarema ou Maricá.
+            </p>
+            <a href="{% url 'lista_livros' %}" class="btn btn-primary mt-2">Ir para o Acervo</a>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card p-4 text-center h-100 d-flex flex-column justify-content-center shadow-sm">
+            <i class="bi bi-bookmark-check display-4 text-success mb-3"></i>
+            <h4 class="fw-bold">Meus Empréstimos</h4>
+            <p class="text-muted">Acompanhe os livros que tem atualmente emprestados e os prazos de devolução.</p>
+            <a href="{% url 'meus_emprestimos' %}" class="btn btn-success mt-2">Ver Meus Empréstimos</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{{ por_mes|json_script:"dados-mes" }}
+{{ distribuicao|json_script:"dados-dist" }}
+{% endblock %}
+
+{% if user.is_staff %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const dadosDist = JSON.parse(document.getElementById('dados-dist').textContent);
+    if (dadosDist.length > 0) {
+        new Chart(document.getElementById('grafDistribuicao'), {
+            type: 'doughnut',
+            data: {
+                labels: dadosDist.map(x => x.categoria),
+                datasets: [{
+                    data: dadosDist.map(x => x.total),
+                    backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0', '#6f42c1']
+                }]
+            }
+        });
+    }
+
+    const canvasMes = document.getElementById('grafMes');
+    if (canvasMes) {
+        const dadosMes = JSON.parse(document.getElementById('dados-mes').textContent);
+        new Chart(canvasMes, {
+            type: 'bar',
+            data: {
+                labels: dadosMes.map(x => x.mes),
+                datasets: [{
+                    label: 'Empréstimos por mês',
+                    data: dadosMes.map(x => x.total),
+                    backgroundColor: '#0d6efd',
+                    borderRadius: 6
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+        });
+    }
+</script>
+{% endblock %}
+{% endif %}
